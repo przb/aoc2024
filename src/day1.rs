@@ -9,9 +9,11 @@ pub fn part1(input: &str) -> isize {
         left.push(line.next().unwrap().parse().unwrap());
         rght.push(line.next().unwrap().parse().unwrap());
     });
-    left.sort();
-    rght.sort();
-    left.iter().zip(rght).map(|(l, r)| isize::abs(l - r)).sum()
+    left.iter()
+        .sorted()
+        .zip(rght.iter().sorted())
+        .map(|(l, r)| isize::abs(l - r))
+        .sum()
 }
 
 #[aoc(day1, part2)]
