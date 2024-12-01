@@ -26,5 +26,29 @@ pub fn part2(input: &str) -> usize {
 
     let rmap = rght.into_iter().counts();
 
-    left.iter().map(|val| *val as usize * rmap.get(val).unwrap_or(&0)).sum()
+    left.iter()
+        .map(|val| *val as usize * rmap.get(val).unwrap_or(&0))
+        .sum()
+}
+
+#[cfg(test)]
+mod test {
+
+    use super::*;
+    use std::fs;
+
+    fn get_input() -> String {
+        let input_path = "input/2024/day1.txt";
+        fs::read_to_string(input_path).unwrap()
+    }
+
+    #[test]
+    fn part1_real_input() {
+        assert_eq!(part1(&get_input()), 1530215)
+    }
+
+    #[test]
+    fn part2_real_input() {
+        assert_eq!(part2(&get_input()), 26800609)
+    }
 }
