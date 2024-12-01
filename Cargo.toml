@@ -1,7 +1,6 @@
 [package]
-name = "advent-of-code-2015"
+name = "aoc2024"
 version = "0.1.0"
-authors = ["Grégory Obanos <gregory.obanos@gmail.com>"]
 edition = "2021"
 
 [lib]
