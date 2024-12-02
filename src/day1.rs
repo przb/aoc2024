@@ -1,7 +1,7 @@
 use itertools::Itertools;
 
 #[allow(dead_code)]
-fn builtin_parse(input: &str, left: &mut Vec<isize>, rght: &mut Vec<isize>) {
+fn builtin_parse(input: &str, left: &mut Vec<usize>, rght: &mut Vec<usize>) {
     let _ = input.lines().for_each(|line| {
         let mut line_iter = line.split_ascii_whitespace();
         left.push(line_iter.next().unwrap().parse().unwrap());
@@ -11,7 +11,7 @@ fn builtin_parse(input: &str, left: &mut Vec<isize>, rght: &mut Vec<isize>) {
 
 #[allow(dead_code)]
 #[inline(always)]
-fn custom_parse(input: &str, left: &mut Vec<isize>, rght: &mut Vec<isize>) {
+fn custom_parse(input: &str, left: &mut Vec<usize>, rght: &mut Vec<usize>) {
     let mut val = 0;
     input.as_bytes().iter().for_each(|b| match b {
         b' ' => {
@@ -26,7 +26,7 @@ fn custom_parse(input: &str, left: &mut Vec<isize>, rght: &mut Vec<isize>) {
         }
         b'0'..=b'9' => {
             val *= 10;
-            val += *b as isize - 48;
+            val += *b as usize - 48;
         }
         _ => panic!("im tired of this grampa"),
     });
@@ -38,7 +38,7 @@ fn custom_parse(input: &str, left: &mut Vec<isize>, rght: &mut Vec<isize>) {
 }
 
 #[aoc(day1, part1)]
-pub fn part1(input: &str) -> isize {
+pub fn part1(input: &str) -> usize {
     let mut left = Vec::with_capacity(1000);
     let mut rght = Vec::with_capacity(1000);
 
@@ -47,7 +47,7 @@ pub fn part1(input: &str) -> isize {
     left.into_iter()
         .sorted()
         .zip(rght.into_iter().sorted())
-        .map(|(l, r)| isize::abs(l - r))
+        .map(|(l, r)| l.abs_diff(r))
         .sum()
 }
 
@@ -60,7 +60,7 @@ pub fn part2(input: &str) -> usize {
     let rmap = rght.into_iter().counts();
 
     left.into_iter()
-        .map(|val| val as usize * rmap.get(&val).unwrap_or(&0))
+        .map(|val| val * rmap.get(&val).unwrap_or(&0))
         .sum()
 }
 
