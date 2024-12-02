@@ -1,5 +1,28 @@
 use itertools::Itertools;
 
+#[allow(dead_code)]
+fn custom_parse(input: &str, left: &mut Vec<isize>, rght: &mut Vec<isize>) {
+    let mut val = 0;
+    input.as_bytes().iter().for_each(|b| match b {
+        b' ' => {
+            if val != 0 {
+                left.push(val);
+            }
+            val = 0;
+        }
+        b'\n' => {
+            rght.push(val);
+            val = 0;
+        }
+        b'0'..=b'9' => {
+            val *= 10;
+            val += *b as isize - 48;
+        }
+        _ => panic!("im tired of this grampa"),
+    });
+}
+
+#[allow(dead_code)]
 fn get_both<'a>(
     input: &'a str,
 ) -> (
@@ -20,7 +43,9 @@ fn get_both<'a>(
 
 #[aoc(day1, part1)]
 pub fn part1(input: &str) -> isize {
-    let (left, rght) = get_both(input);
+    let mut left = Vec::with_capacity(1000);
+    let mut rght = Vec::with_capacity(1000);
+    custom_parse(input, &mut left, &mut rght);
     left.into_iter()
         .sorted()
         .zip(rght.into_iter().sorted())
@@ -30,10 +55,14 @@ pub fn part1(input: &str) -> isize {
 
 #[aoc(day1, part2)]
 pub fn part2(input: &str) -> usize {
-    let (left, rght) = get_both(input);
-    let rmap = rght.counts();
+    let mut left = Vec::with_capacity(1000);
+    let mut rght = Vec::with_capacity(1000);
 
-    left.map(|val| val as usize * rmap.get(&val).unwrap_or(&0))
+    custom_parse(input, &mut left, &mut rght);
+    let rmap = rght.into_iter().counts();
+
+    left.into_iter()
+        .map(|val| val as usize * rmap.get(&val).unwrap_or(&0))
         .sum()
 }
 
