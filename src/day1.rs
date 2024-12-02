@@ -10,6 +10,7 @@ fn builtin_parse(input: &str, left: &mut Vec<isize>, rght: &mut Vec<isize>) {
 }
 
 #[allow(dead_code)]
+#[inline(always)]
 fn custom_parse(input: &str, left: &mut Vec<isize>, rght: &mut Vec<isize>) {
     let mut val = 0;
     input.as_bytes().iter().for_each(|b| match b {
