@@ -1,29 +1,34 @@
-#[aoc(day2, part1)]
-pub fn part1(input: &str) -> usize {
-    input
-        .lines()
-        .filter(|lines| {
-            let old_line = lines
-                .split_ascii_whitespace()
-                .map(|num| num.parse::<usize>().unwrap());
-            let mut line = lines
-                .split_ascii_whitespace()
-                .map(|num| num.parse::<usize>().unwrap());
+use itertools::Itertools;
 
-            let sorted = line.clone().is_sorted() || line.clone().rev().is_sorted();
-            let _ = line.next();
+// returns true if the line is valid, false if not
+// valid if all of the following:
+//  - either ascending or decending
+//  - the differences between each sequential number is > 0 and < 4
+fn line_is_valid(line: &str, safeties: usize) -> bool {
+    let num_nums = line.split_ascii_whitespace().count();
+    line.split_ascii_whitespace()
+        .map(|num| num.parse::<usize>().unwrap())
+        .combinations(num_nums - safeties)
+        .any(|line| {
+            let old_line = line.iter();
+
+            let sorted = line.is_sorted() || line.iter().rev().is_sorted();
             sorted
                 && old_line
-                    .zip(line)
-                    .map(|(prev, curr)| prev.abs_diff(curr))
+                    .zip(line.iter().skip(1))
+                    .map(|(prev, curr)| prev.abs_diff(*curr))
                     .all(|val| val <= 3 && val >= 1)
         })
-        .count()
+}
+
+#[aoc(day2, part1)]
+pub fn part1(input: &str) -> usize {
+    input.lines().filter(|line| line_is_valid(line, 0)).count()
 }
 
 #[aoc(day2, part2)]
 pub fn part2(input: &str) -> usize {
-    0
+    input.lines().filter(|line| line_is_valid(line, 1)).count()
 }
 
 #[cfg(test)]
@@ -60,6 +65,6 @@ mod test {
 
     #[test]
     fn part2_real_input() {
-        assert_eq!(part2(&get_input()), 0)
+        assert_eq!(part2(&get_input()), 514)
     }
 }
