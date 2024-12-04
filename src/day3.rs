@@ -1,7 +1,10 @@
+#[inline]
 fn parse_digit(byte: u8, digit: &mut [u8], digit_len: &mut usize) -> bool {
     let is_digit = (b'0'..=b'9').contains(&byte);
     if is_digit && *digit_len < digit.len() {
-        digit[*digit_len] = byte - b'0';
+        unsafe {
+            *digit.get_unchecked_mut(*digit_len) = byte - b'0';
+        }
         *digit_len += 1;
         true
     } else {
@@ -9,6 +12,7 @@ fn parse_digit(byte: u8, digit: &mut [u8], digit_len: &mut usize) -> bool {
     }
 }
 
+#[inline]
 fn read_memory(input: &str, do_do: bool) -> usize {
     let mut x = [0, 0, 0];
     let mut y = [0, 0, 0];
@@ -27,26 +31,35 @@ fn read_memory(input: &str, do_do: bool) -> usize {
             if byte == b')' {
                 if y_len > 0 {
                     // x and y are in reverse byte order
-                    let x = match x_len {
-                        1 => x[0] as usize,
-                        2 => (x[0] as usize * 10) + x[1] as usize,
-                        3 => (x[0] as usize * 100) + (x[1] as usize * 10) + x[2] as usize,
-                        _ => panic!("Invalid X Len"),
-                    };
-                    let y = match y_len {
-                        1 => y[0] as usize,
-                        2 => (y[0] as usize * 10) + y[1] as usize,
-                        3 => (y[0] as usize * 100) + (y[1] as usize * 10) + y[2] as usize,
-                        _ => panic!("Invalid Y Len"),
-                    };
-
-                    sum += if do_do && mul_enabled {
-                        x * y
-                    } else if do_do && !mul_enabled {
-                        0
-                    } else {
-                        x * y
-                    };
+                    unsafe {
+                        let x = match x_len {
+                            1 => *x.get_unchecked(0) as usize,
+                            2 => (*x.get_unchecked(0) as usize * 10) + *x.get_unchecked(1) as usize,
+                            3 => {
+                                (*x.get_unchecked(0) as usize * 100)
+                                    + (*x.get_unchecked(1) as usize * 10)
+                                    + *x.get_unchecked(2) as usize
+                            }
+                            _ => panic!("Invalid X Len"),
+                        };
+                        let y = match y_len {
+                            1 => *y.get_unchecked(0) as usize,
+                            2 => (*y.get_unchecked(0) as usize * 10) + *y.get_unchecked(1) as usize,
+                            3 => {
+                                (*y.get_unchecked(0) as usize * 100)
+                                    + (*y.get_unchecked(1) as usize * 10)
+                                    + *y.get_unchecked(2) as usize
+                            }
+                            _ => panic!("Invalid Y Len"),
+                        };
+                        sum += if do_do && mul_enabled {
+                            x * y
+                        } else if do_do && !mul_enabled {
+                            0
+                        } else {
+                            x * y
+                        };
+                    }
 
                     // reset everything
                     x_len = 0;
