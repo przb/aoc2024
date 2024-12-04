@@ -1,6 +1,6 @@
 #[inline]
 fn parse_digit(byte: u8, digit: &mut [u8], digit_len: &mut usize) -> bool {
-    let is_digit = (b'0'..=b'9').contains(&byte);
+    let is_digit = byte.is_ascii_digit();
     if is_digit && *digit_len < digit.len() {
         unsafe {
             *digit.get_unchecked_mut(*digit_len) = byte - b'0';
