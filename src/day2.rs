@@ -24,12 +24,18 @@ fn line_is_valid(line: &str, safeties: usize) -> bool {
 
 #[aoc(day2, part1)]
 pub fn part1(input: &str) -> usize {
-    input.par_lines().filter(|line| line_is_valid(line, 0)).count()
+    input
+        .par_lines()
+        .filter(|line| line_is_valid(line, 0))
+        .count()
 }
 
 #[aoc(day2, part2)]
 pub fn part2(input: &str) -> usize {
-    input.par_lines().filter(|line| line_is_valid(line, 1)).count()
+    input
+        .par_lines()
+        .filter(|line| line_is_valid(line, 1))
+        .count()
 }
 
 #[cfg(test)]
