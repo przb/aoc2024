@@ -9,8 +9,7 @@ fn parse_digit(byte: u8, digit: &mut [u8], digit_len: &mut usize) -> bool {
     }
 }
 
-#[aoc(day3, part1)]
-fn part1(input: &str) -> usize {
+fn read_memory(input: &str, do_do: bool) -> usize {
     let mut x = [0, 0, 0];
     let mut y = [0, 0, 0];
     let mut x_len = 0;
@@ -19,6 +18,9 @@ fn part1(input: &str) -> usize {
     let mut found_comma = false;
     let mut prev = 0;
     let mut sum = 0;
+
+    let mut mul_enabled = true;
+    let mut reading_dos = false;
 
     input.bytes().for_each(|byte| {
         if is_parsing {
@@ -38,7 +40,13 @@ fn part1(input: &str) -> usize {
                         _ => panic!("Invalid Y Len"),
                     };
 
-                    sum += x * y;
+                    sum += if do_do && mul_enabled {
+                        x * y
+                    } else if do_do && !mul_enabled {
+                        0
+                    } else {
+                        x * y
+                    };
 
                     // reset everything
                     x_len = 0;
@@ -73,13 +81,62 @@ fn part1(input: &str) -> usize {
                 _ => false,
             }
         } else {
+            match prev {
+                b'd' => {
+                    if byte == b'o' {
+                        // then we need to decide if its a do or a don't
+                        reading_dos = true;
+                    } else {
+                        reading_dos = false;
+                    }
+                }
+                b'o' => {
+                    if byte != b'n' && reading_dos {
+                        reading_dos = false;
+                        mul_enabled = true;
+                    }
+                }
+                b'n' => {
+                    if byte != b'\'' && reading_dos {
+                        reading_dos = false;
+                        mul_enabled = true;
+                    }
+                }
+                b'\'' => {
+                    mul_enabled = if byte == b't' && reading_dos {
+                        false
+                    } else if reading_dos {
+                        true
+                    } else {
+                        mul_enabled
+                    };
+                    //mul_enabled = !(byte == b't' && reading_dos);
+                    reading_dos = false;
+                }
+                b't' => {} // dont need to check t, leaving this here so i dont forget tho
+                _ => {}    // do nothing
+            }
             is_parsing = byte == b'm';
             y_len = 0;
             x_len = 0;
         }
+        //println!(
+        //    "byte: {}, parsing dos: {}, mul_en: {}",
+        //    byte as char, reading_dos, mul_enabled
+        //);
         prev = byte;
     });
     sum.into()
+}
+
+#[aoc(day3, part1)]
+fn part1(input: &str) -> usize {
+    read_memory(input, false)
+}
+
+#[aoc(day3, part2)]
+fn part2(input: &str) -> usize {
+    read_memory(input, true)
 }
 
 #[cfg(test)]
@@ -89,6 +146,8 @@ mod test {
 
     const SAMPLE_INPUT: &str =
         "xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))";
+    const SAMPLE_INPUT_2: &str =
+        "xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))";
     fn get_input() -> String {
         let input_path = "input/2024/day3.txt";
         fs::read_to_string(input_path).unwrap()
@@ -102,5 +161,15 @@ mod test {
     #[test]
     fn part1_real_input() {
         assert_eq!(part1(&get_input()), 170778545)
+    }
+
+    #[test]
+    fn part2_sample_input() {
+        assert_eq!(part2(SAMPLE_INPUT_2), 48)
+    }
+
+    #[test]
+    fn part2_real_input() {
+        assert_eq!(part2(&get_input()), 82868252)
     }
 }
