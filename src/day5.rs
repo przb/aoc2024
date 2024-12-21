@@ -60,6 +60,7 @@ fn part1(input: &DailyInput) -> i32 {
             input
                 .rules
                 .iter()
+                // if the value is None, then it is valid in this case
                 .all(|rule| check_rule(update, rule).unwrap_or(true))
         })
         .map(|update| {
@@ -129,5 +130,10 @@ mod tests {
     #[test]
     fn part2_example() {
         //assert_eq!(part2(&parse("<EXAMPLE>")), "<RESULT>");
+    }
+
+    #[test]
+    fn part2_sample_input() {
+        assert_eq!(part2(&parse(GIVEN_INPUT)), 123);
     }
 }
