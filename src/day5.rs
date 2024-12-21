@@ -56,14 +56,19 @@ fn part1(input: &DailyInput) -> i32 {
     input
         .updates
         .iter()
-        .filter(|&update| input
+        .filter(|&update| {
+            input
                 .rules
                 .iter()
-                .all(|rule| check_rule(update, rule).unwrap_or(true))).map(|update| update
-                        .pages
-                        .get(update.pages.len() / 2)
-                        .copied()
-                        .unwrap_or_default())
+                .all(|rule| check_rule(update, rule).unwrap_or(true))
+        })
+        .map(|update| {
+            update
+                .pages
+                .get(update.pages.len() / 2)
+                .copied()
+                .unwrap_or_default()
+        })
         .sum()
 }
 
@@ -113,7 +118,7 @@ mod tests {
 
     #[test]
     fn part1_real_input() {
-        assert!(part1(&parse(&get_input())) < 10068);
+        assert_eq!(part1(&parse(&get_input())), 4281);
     }
 
     #[test]
