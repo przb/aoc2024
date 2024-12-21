@@ -4,7 +4,7 @@ use strum_macros::EnumIter;
 
 use itertools::Itertools;
 
-#[derive(EnumIter, Clone, Copy, Debug)]
+#[derive(EnumIter, Clone, Copy, Debug, PartialEq, Eq)]
 enum Direction {
     Up,
     Down,
@@ -63,16 +63,7 @@ impl<'a> Iterator for DirectionalChars<'a> {
 impl<'a> DirectionalChars<'a> {
     fn new(input: &'a str, direction: Direction, i: isize) -> Self {
         let line_len = (input.chars().position(|c| c == '\n').unwrap() + 1) as isize;
-        let movement_vec = match direction {
-            Direction::Up => (0, line_len * -1),
-            Direction::Down => (0, line_len),
-            Direction::Left => (-1, 0),
-            Direction::Right => (1, 0),
-            Direction::UpRight => (1, line_len * -1),
-            Direction::UpLeft => (-1, line_len * -1),
-            Direction::DownRight => (1, line_len),
-            Direction::DownLeft => (-1, line_len),
-        };
+        let movement_vec = get_movement_vec(line_len, direction);
         Self {
             has_overflowed: false,
             movement_vec,
@@ -80,6 +71,51 @@ impl<'a> DirectionalChars<'a> {
             input: input.as_bytes(),
         }
     }
+}
+
+fn get_movement_vec(line_len: isize, direction: Direction) -> (isize, isize) {
+    match direction {
+        Direction::Up => (0, line_len * -1),
+        Direction::Down => (0, line_len),
+        Direction::Left => (-1, 0),
+        Direction::Right => (1, 0),
+        Direction::UpRight => (1, line_len * -1),
+        Direction::UpLeft => (-1, line_len * -1),
+        Direction::DownRight => (1, line_len),
+        Direction::DownLeft => (-1, line_len),
+    }
+}
+fn get_movement_vec_sum(line_len: isize, direction: Direction) -> isize {
+    let vec = get_movement_vec(line_len, direction);
+    vec.0 + vec.1
+}
+fn is_x_mas(input: &str, index: usize, line_len: isize) -> bool {
+    let around = [
+        get_movement_vec_sum(line_len, Direction::UpLeft),
+        get_movement_vec_sum(line_len, Direction::UpRight),
+        get_movement_vec_sum(line_len, Direction::DownRight),
+        get_movement_vec_sum(line_len, Direction::DownLeft),
+    ];
+
+    let around: Vec<_> = around
+        .iter()
+        .map(|&sum| {
+            let offset = if sum < 0 {
+                let sum = sum.abs() as usize;
+                let val = index.checked_sub(sum);
+                val
+            } else {
+                index.checked_add(sum as usize)
+            }?;
+            input.as_bytes().get(offset)
+        })
+        .collect();
+    let ul_to_lr = around[0] == Some(&b'M') && around[2] == Some(&b'S');
+    let lr_to_ul = around[2] == Some(&b'M') && around[0] == Some(&b'S');
+    let ur_to_ll = around[1] == Some(&b'M') && around[3] == Some(&b'S');
+    let ll_to_ur = around[3] == Some(&b'M') && around[1] == Some(&b'S');
+
+    input.as_bytes()[index] == b'A' && (ul_to_lr || lr_to_ul) && (ur_to_ll || ll_to_ur)
 }
 
 #[aoc(day4, part1)]
@@ -105,6 +141,16 @@ fn part1(input: &str) -> usize {
         .sum()
 }
 
+#[aoc(day4, part2)]
+fn part2(input: &str) -> usize {
+    let line_len = (input.chars().position(|c| c == '\n').unwrap()) as isize + 1;
+    input
+        .char_indices()
+        .skip(line_len as usize)
+        .filter(|(index, _char)| is_x_mas(input, *index, line_len))
+        .count()
+}
+
 #[cfg(test)]
 mod test {
 
@@ -127,13 +173,20 @@ MXMXAXMASX";
     }
 
     #[test]
+    fn get_move_vec_test() {
+        let vec = get_movement_vec(11, Direction::UpRight);
+        let sum = vec.0 + vec.1;
+        assert_eq!(sum, -10)
+    }
+
+    #[test]
     fn part1_sample_input() {
         assert_eq!(part1(SAMPLE_INPUT), 18)
     }
 
     #[test]
     fn part2_sample_input() {
-        //assert_eq!(part2(SAMPLE_INPUT), 4)
+        assert_eq!(part2(SAMPLE_INPUT), 9);
     }
 
     #[test]
@@ -142,7 +195,31 @@ MXMXAXMASX";
     }
 
     #[test]
+    fn part_2_custom_test() {
+        let input = "MMM
+AAA
+SSS";
+        assert_eq!(part2(&input), 1);
+
+        let input = "SMM
+AAA
+SSM";
+        assert_eq!(part2(&input), 1);
+
+        let input = "SMS
+AAA
+MSM";
+        assert_eq!(part2(&input), 1);
+
+        let input = "MMS
+AAA
+MSS";
+        assert_eq!(part2(&input), 1);
+    }
+
+    #[test]
     fn part2_real_input() {
-        //assert_eq!(part2(&get_input()), 514)
+        // previous attempt was incorrect
+        assert_eq!(part2(&get_input()), 2034);
     }
 }
