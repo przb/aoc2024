@@ -1,4 +1,3 @@
-use std::isize;
 use strum::IntoEnumIterator;
 use strum_macros::EnumIter;
 
@@ -43,7 +42,7 @@ impl<'a> Iterator for DirectionalChars<'a> {
         let char = self.input.get(self.current_index);
         let vec = self.movement_vec.0 + self.movement_vec.1;
         let index = if vec < 0 {
-            self.current_index.checked_sub(vec.abs() as usize)
+            self.current_index.checked_sub(vec.unsigned_abs())
         } else {
             self.current_index.checked_add(vec as usize)
         };
@@ -75,12 +74,12 @@ impl<'a> DirectionalChars<'a> {
 
 fn get_movement_vec(line_len: isize, direction: Direction) -> (isize, isize) {
     match direction {
-        Direction::Up => (0, line_len * -1),
+        Direction::Up => (0, -line_len),
         Direction::Down => (0, line_len),
         Direction::Left => (-1, 0),
         Direction::Right => (1, 0),
-        Direction::UpRight => (1, line_len * -1),
-        Direction::UpLeft => (-1, line_len * -1),
+        Direction::UpRight => (1, -line_len),
+        Direction::UpLeft => (-1, -line_len),
         Direction::DownRight => (1, line_len),
         Direction::DownLeft => (-1, line_len),
     }
@@ -101,9 +100,9 @@ fn is_x_mas(input: &str, index: usize, line_len: isize) -> bool {
         .iter()
         .map(|&sum| {
             let offset = if sum < 0 {
-                let sum = sum.abs() as usize;
-                let val = index.checked_sub(sum);
-                val
+                let sum = sum.unsigned_abs();
+                
+                index.checked_sub(sum)
             } else {
                 index.checked_add(sum as usize)
             }?;
@@ -199,22 +198,22 @@ MXMXAXMASX";
         let input = "MMM
 AAA
 SSS";
-        assert_eq!(part2(&input), 1);
+        assert_eq!(part2(input), 1);
 
         let input = "SMM
 AAA
 SSM";
-        assert_eq!(part2(&input), 1);
+        assert_eq!(part2(input), 1);
 
         let input = "SMS
 AAA
 MSM";
-        assert_eq!(part2(&input), 1);
+        assert_eq!(part2(input), 1);
 
         let input = "MMS
 AAA
 MSS";
-        assert_eq!(part2(&input), 1);
+        assert_eq!(part2(input), 1);
     }
 
     #[test]

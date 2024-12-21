@@ -56,20 +56,14 @@ fn part1(input: &DailyInput) -> i32 {
     input
         .updates
         .iter()
-        .filter_map(|update| {
-            input
+        .filter(|&update| input
                 .rules
                 .iter()
-                .all(|rule| check_rule(update, rule).unwrap_or(true))
-                .then(|| {
-                    update
+                .all(|rule| check_rule(update, rule).unwrap_or(true))).map(|update| update
                         .pages
-                        .iter()
-                        .nth(update.pages.iter().count() / 2)
+                        .get(update.pages.len() / 2)
                         .copied()
-                        .unwrap_or_default()
-                })
-        })
+                        .unwrap_or_default())
         .sum()
 }
 
@@ -124,7 +118,7 @@ mod tests {
 
     #[test]
     fn part1_sample_input() {
-        assert_eq!(part1(&parse(&GIVEN_INPUT)), 143);
+        assert_eq!(part1(&parse(GIVEN_INPUT)), 143);
     }
 
     #[test]

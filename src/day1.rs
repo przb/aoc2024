@@ -2,7 +2,7 @@ use itertools::Itertools;
 
 #[allow(dead_code)]
 fn builtin_parse(input: &str, left: &mut Vec<usize>, rght: &mut Vec<usize>) {
-    let _ = input.lines().for_each(|line| {
+    input.lines().for_each(|line| {
         let mut line_iter = line.split_ascii_whitespace();
         left.push(line_iter.next().unwrap().parse().unwrap());
         rght.push(line_iter.next().unwrap().parse().unwrap());

@@ -18,7 +18,7 @@ fn line_is_valid(line: &str, safeties: usize) -> bool {
                 && old_line
                     .zip(line.iter().skip(1))
                     .map(|(prev, curr)| prev.abs_diff(*curr))
-                    .all(|val| val <= 3 && val >= 1)
+                    .all(|val| (1..=3).contains(&val))
         })
 }
 

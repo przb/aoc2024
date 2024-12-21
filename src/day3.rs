@@ -28,46 +28,44 @@ fn read_memory(input: &str, do_do: bool) -> usize {
 
     input.bytes().for_each(|byte| {
         if is_parsing {
-            if byte == b')' {
-                if y_len > 0 {
-                    // x and y are in reverse byte order
-                    unsafe {
-                        let x = match x_len {
-                            1 => *x.get_unchecked(0) as usize,
-                            2 => (*x.get_unchecked(0) as usize * 10) + *x.get_unchecked(1) as usize,
-                            3 => {
-                                (*x.get_unchecked(0) as usize * 100)
-                                    + (*x.get_unchecked(1) as usize * 10)
-                                    + *x.get_unchecked(2) as usize
-                            }
-                            _ => panic!("Invalid X Len"),
-                        };
-                        let y = match y_len {
-                            1 => *y.get_unchecked(0) as usize,
-                            2 => (*y.get_unchecked(0) as usize * 10) + *y.get_unchecked(1) as usize,
-                            3 => {
-                                (*y.get_unchecked(0) as usize * 100)
-                                    + (*y.get_unchecked(1) as usize * 10)
-                                    + *y.get_unchecked(2) as usize
-                            }
-                            _ => panic!("Invalid Y Len"),
-                        };
-                        sum += if do_do && mul_enabled {
-                            x * y
-                        } else if do_do && !mul_enabled {
-                            0
-                        } else {
-                            x * y
-                        };
-                    }
-
-                    // reset everything
-                    x_len = 0;
-                    y_len = 0;
-                    //is_parsing = false;
-                    found_comma = false;
-                    prev = 0;
+            if byte == b')' && y_len > 0 {
+                // x and y are in reverse byte order
+                unsafe {
+                    let x = match x_len {
+                        1 => *x.get_unchecked(0) as usize,
+                        2 => (*x.get_unchecked(0) as usize * 10) + *x.get_unchecked(1) as usize,
+                        3 => {
+                            (*x.get_unchecked(0) as usize * 100)
+                                + (*x.get_unchecked(1) as usize * 10)
+                                + *x.get_unchecked(2) as usize
+                        }
+                        _ => panic!("Invalid X Len"),
+                    };
+                    let y = match y_len {
+                        1 => *y.get_unchecked(0) as usize,
+                        2 => (*y.get_unchecked(0) as usize * 10) + *y.get_unchecked(1) as usize,
+                        3 => {
+                            (*y.get_unchecked(0) as usize * 100)
+                                + (*y.get_unchecked(1) as usize * 10)
+                                + *y.get_unchecked(2) as usize
+                        }
+                        _ => panic!("Invalid Y Len"),
+                    };
+                    sum += if do_do && mul_enabled {
+                        x * y
+                    } else if do_do && !mul_enabled {
+                        0
+                    } else {
+                        x * y
+                    };
                 }
+
+                // reset everything
+                x_len = 0;
+                y_len = 0;
+                //is_parsing = false;
+                found_comma = false;
+                prev = 0;
             }
             is_parsing = match prev {
                 b'm' => byte == b'u',
@@ -139,7 +137,7 @@ fn read_memory(input: &str, do_do: bool) -> usize {
         //);
         prev = byte;
     });
-    sum.into()
+    sum
 }
 
 #[aoc(day3, part1)]
