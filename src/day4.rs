@@ -101,7 +101,7 @@ fn is_x_mas(input: &str, index: usize, line_len: isize) -> bool {
         .map(|&sum| {
             let offset = if sum < 0 {
                 let sum = sum.unsigned_abs();
-                
+
                 index.checked_sub(sum)
             } else {
                 index.checked_add(sum as usize)
