@@ -1,6 +1,8 @@
 use aoc_runner_derive::{aoc, aoc_generator};
 use itertools::Itertools;
+use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 
+#[derive(Clone, Copy)]
 struct Rule {
     before: i32,
     after: i32,
@@ -51,18 +53,45 @@ fn check_rule(u: &Update, r: &Rule) -> Option<bool> {
     Some(before < after)
 }
 
+fn assemble_order(rules: &[Rule], update: &Update) -> Update {
+    let order = update
+        .pages
+        .iter()
+        .permutations(update.pages.len())
+        .find(|permut| {
+            rules.iter().all(|rule| {
+                check_rule(
+                    &Update {
+                        pages: permut.iter().copied().copied().collect(),
+                    },
+                    rule,
+                )
+                // this fn should only be called on rules that are relevant to the update
+                .unwrap()
+            })
+        })
+        .unwrap()
+        .iter()
+        .copied()
+        .copied()
+        .collect();
+
+    Update { pages: order }
+}
+
+fn update_is_valid(rules: &[Rule], update: &Update) -> bool {
+    rules
+        .iter()
+        // if the value is None, then it is valid in this case
+        .all(|rule| check_rule(update, rule).unwrap_or(true))
+}
+
 #[aoc(day5, part1)]
 fn part1(input: &DailyInput) -> i32 {
     input
         .updates
         .iter()
-        .filter(|&update| {
-            input
-                .rules
-                .iter()
-                // if the value is None, then it is valid in this case
-                .all(|rule| check_rule(update, rule).unwrap_or(true))
-        })
+        .filter(|&update| update_is_valid(&input.rules, update))
         .map(|update| {
             update
                 .pages
@@ -75,7 +104,25 @@ fn part1(input: &DailyInput) -> i32 {
 
 #[aoc(day5, part2)]
 fn part2(input: &DailyInput) -> i32 {
-    0
+    // for every update, get only the relevant rules
+    // from the relevant rules, reconstruct the ordering
+    input
+        .updates
+        .par_iter()
+        .filter(|update| !update_is_valid(&input.rules, update))
+        .map(|update| {
+            let relevant_rules = input
+                .rules
+                .iter()
+                // if the rule is none, then it is not relevant here, so filter it out (since its inverted)
+                .filter(|rule| !check_rule(update, rule).unwrap_or(true))
+                .map(|rule| *rule)
+                .collect_vec();
+            let permut = assemble_order(&relevant_rules, update).pages;
+            //println!("permutation: {permut:?}");
+            permut[permut.len() / 2]
+        })
+        .sum()
 }
 
 #[cfg(test)]
