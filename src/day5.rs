@@ -76,14 +76,14 @@ fn assemble_order(rules: &[Rule], _update: &Update) -> Update {
     let mut order = Vec::with_capacity(25);
 
     rules.iter().for_each(|rule| {
-        let before_index = order.iter().position(|val| *val as i32 == rule.before);
-        let after_index = order.iter().position(|val| *val as i32 == rule.after);
+        let before_index = order.iter().position(|val| { *val } == rule.before);
+        let after_index = order.iter().position(|val| { *val } == rule.after);
         if before_index.is_none() && after_index.is_none() {
             // append to end i suppose
             order.push(rule.before);
             order.push(rule.after);
         } else if before_index.is_some() && after_index.is_some() {
-            if !follows_rule(&order, &rule) {
+            if !follows_rule(&order, rule) {
                 // if order is wrong, then rearrange
                 let before_index = before_index.unwrap();
                 let after_index = after_index.unwrap();
@@ -153,8 +153,7 @@ fn part2(input: &DailyInput) -> i32 {
                 .rules
                 .iter()
                 // if the rule is none, then it is not relevant here, so filter it out
-                .filter(|rule| try_follows_rule(update, rule).is_some())
-                .map(|rule| *rule)
+                .filter(|rule| try_follows_rule(update, rule).is_some()).copied()
                 .collect_vec();
             let permut = assemble_order(&relevant_rules, update);
 
