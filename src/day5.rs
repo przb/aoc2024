@@ -88,6 +88,7 @@ fn assemble_order(rules: &[Rule], _update: &Update) -> Update {
                 let before_index = before_index.unwrap();
                 let after_index = after_index.unwrap();
 
+                // TODO Call swap instead of remove then insert
                 let tmp = order.remove(before_index);
                 order.insert(after_index, tmp);
             } else {
@@ -144,6 +145,7 @@ fn part2(input: &DailyInput) -> i32 {
     // for every update, get only the relevant rules
     // from the relevant rules, reconstruct the ordering
     let mut sum = 0;
+
     let _permuts = input
         .updates
         .iter()
@@ -153,9 +155,20 @@ fn part2(input: &DailyInput) -> i32 {
                 .rules
                 .iter()
                 // if the rule is none, then it is not relevant here, so filter it out
-                .filter(|rule| try_follows_rule(update, rule).is_some()).copied()
+                .filter(|rule| try_follows_rule(update, rule).is_some())
+                .copied()
                 .collect_vec();
             let permut = assemble_order(&relevant_rules, update);
+
+            let update_is_valid = update_is_valid(&input.rules, &permut);
+            if !update_is_valid {
+                let relevant_rules = relevant_rules.iter().map(Rule::to_string).join(" - ");
+                //println!("before        {update:?}");
+                //println!("assembled     {permut:?}");
+                //println!("rules:        {relevant_rules:?}");
+                //println!("update valid: {update_is_valid}");
+                //println!();
+            }
 
             assert!(permut.len() & 0x01 == 0x01); // vec must be odd len
             let len = permut.len();
@@ -229,5 +242,76 @@ mod tests {
     #[test]
     fn part2_sample_input() {
         assert_eq!(part2(&parse(GIVEN_INPUT)), 123);
+    }
+
+    #[test]
+    fn assemble_complex_input() {
+        // taken from one of the failing updates from my puzzle input
+        let rules = "26|82
+35|14
+35|26
+35|82
+58|26
+58|38
+58|82
+58|98
+58|35
+58|12
+58|14
+58|13
+62|14
+62|26
+62|38
+62|35
+62|58
+62|98
+62|68
+62|13
+62|12
+62|82
+14|13
+14|82
+14|98
+14|12
+14|26
+14|38
+12|98
+12|13
+12|26
+12|82
+13|98
+13|82
+68|98
+68|12
+68|38
+68|14
+68|26
+68|13
+68|82
+38|82
+38|98
+38|12
+38|26
+38|13
+26|13
+26|98
+98|82
+35|12
+35|38
+35|68
+35|98
+35|13
+58|68";
+        let rules = rules
+            .lines()
+            .map(|s| Rule::from_str(s).unwrap())
+            .collect_vec();
+        // this update is invalid
+        let update = "62,68,14,58,38,35,12,26,98,82,13";
+        let update = update.split(",").map(|n| n.parse().unwrap()).collect_vec();
+
+        let assembled = assemble_order(&rules, &update);
+        assert_ne!(assembled, update);
+        assert!(update_is_valid(&rules, &assembled))
     }
 }
