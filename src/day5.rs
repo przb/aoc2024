@@ -11,7 +11,7 @@ struct DailyInput {
 }
 
 mod rule {
-    use std::str::FromStr;
+    use std::{fmt::Display, str::FromStr};
 
     #[derive(Clone, Copy, PartialEq, Eq, Debug)]
     pub(crate) struct Rule {
@@ -35,9 +35,9 @@ mod rule {
             })
         }
     }
-    impl ToString for Rule {
-        fn to_string(&self) -> String {
-            format!("{}|{}", self.before, self.after)
+    impl Display for Rule {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            write!(f, "{}|{}", self.before, self.after)
         }
     }
 }
