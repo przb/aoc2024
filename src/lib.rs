@@ -1,4 +1,5 @@
 mod day5;
+mod day6;
 extern crate aoc_runner;
 
 #[macro_use]
