@@ -116,7 +116,7 @@ fn part1(input: &str) -> i32 {
     input
         .traverse()
         .map(|(_ch, idx)| idx)
-        .sorted()
+        .sorted_unstable()
         .dedup()
         .count()
         .try_into()
