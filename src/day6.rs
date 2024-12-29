@@ -11,7 +11,7 @@ enum Direction {
 #[inline(always)]
 fn get_vec(direction: &Direction, line_len: isize) -> (isize, isize) {
     match direction {
-        Direction::Up => (0, -1 * line_len),
+        Direction::Up => (0, -line_len),
         Direction::Right => (1, 0),
         Direction::Down => (0, line_len),
         Direction::Left => (-1, 0),
@@ -96,7 +96,7 @@ impl<'a> Traverser<'a> {
 
 impl<'a> Traversable<'a> for &'a str {
     fn traverse(&self) -> Traverser<'a> {
-        Traverser::new(&self)
+        Traverser::new(self)
     }
 }
 
@@ -152,7 +152,7 @@ mod tests {
 
     #[test]
     fn part1_given_input() {
-        assert_eq!(part1(&SAMPLE_INPUT), 41);
+        assert_eq!(part1(SAMPLE_INPUT), 41);
     }
 
     #[test]
